@@ -1,6 +1,47 @@
-@RickAndMortyBackend_HostAddress = http://localhost:5262
+@RickAndMortyBackend_HostAddress = https://localhost:7127
 
-GET {{RickAndMortyBackend_HostAddress}}/weatherforecast/
+### Get all characters (first page)
+GET {{RickAndMortyBackend_HostAddress}}/api/characters
+Accept: application/json
+
+### Get characters - page 2
+GET {{RickAndMortyBackend_HostAddress}}/api/characters?page=2
+Accept: application/json
+
+### Filter by name
+GET {{RickAndMortyBackend_HostAddress}}/api/characters?name=rick
+Accept: application/json
+
+### Filter by status
+GET {{RickAndMortyBackend_HostAddress}}/api/characters?status=alive
+Accept: application/json
+
+### Filter by species
+GET {{RickAndMortyBackend_HostAddress}}/api/characters?species=human
+Accept: application/json
+
+### Combined filters
+GET {{RickAndMortyBackend_HostAddress}}/api/characters?name=morty&status=alive&species=human
+Accept: application/json
+
+### Get character by ID
+GET {{RickAndMortyBackend_HostAddress}}/api/characters/1
+Accept: application/json
+
+### Get character by ID - Rick Sanchez
+GET {{RickAndMortyBackend_HostAddress}}/api/characters/1
+Accept: application/json
+
+### Get character by ID - Morty Smith
+GET {{RickAndMortyBackend_HostAddress}}/api/characters/2
+Accept: application/json
+
+### Test not found - invalid character ID
+GET {{RickAndMortyBackend_HostAddress}}/api/characters/99999
+Accept: application/json
+
+### Test not found - no results with filter
+GET {{RickAndMortyBackend_HostAddress}}/api/characters?name=personaje_que_no_existe_xyz
 Accept: application/json
 
 ###
