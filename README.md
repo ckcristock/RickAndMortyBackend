@@ -206,9 +206,22 @@ Implementado mediante middleware `GlobalExceptionHandlerMiddleware` que captura 
 
 ### Persistencia inteligente
 
-- Los personajes consultados se almacenan automáticamente en la base de datos MySQL
-- Uso de patrón Upsert (Insert o Update) para mantener datos actualizados
-- Índices en campos comunes de búsqueda (Name, Status, Species)
+**Estrategia de caché en MySQL:**
+
+- **Para detalles de personajes (GET /api/characters/{id})**:
+  - Primero se consulta la base de datos local
+  - Si el personaje existe en BD, se devuelve inmediatamente (respuesta más rápida, menos carga a API externa)
+  - Si no existe, se consulta la API de Rick & Morty y se guarda en BD para futuras consultas
+- **Para listados (GET /api/characters)**:
+  - Siempre consulta la API externa para obtener datos frescos y respetar paginación/filtros
+  - Los resultados se guardan automáticamente en BD como respaldo histórico
+
+- **Ventajas**:
+  - ✅ Reducción de llamadas a la API externa
+  - ✅ Mejor tiempo de respuesta en consultas repetidas
+  - ✅ Disponibilidad de datos históricos
+  - ✅ Patrón Upsert (Insert o Update) para mantener datos actualizados
+  - ✅ Índices en Name, Status y Species para búsquedas optimizadas
 
 ### Configuración CORS
 

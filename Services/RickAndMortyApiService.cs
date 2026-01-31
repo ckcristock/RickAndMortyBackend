@@ -8,7 +8,7 @@ namespace RickAndMortyBackend.Services
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<RickAndMortyApiService> _logger;
-        private const string BaseUrl = "https://rickandmortyapi.com/api";
+        private const string BaseUrl = "https://rickandmortyapi.com/api/";
 
         public RickAndMortyApiService(HttpClient httpClient, ILogger<RickAndMortyApiService> logger)
         {
@@ -31,7 +31,7 @@ namespace RickAndMortyBackend.Services
                 if (!string.IsNullOrEmpty(species)) queryParams.Add($"species={Uri.EscapeDataString(species)}");
 
                 var queryString = string.Join("&", queryParams);
-                var response = await _httpClient.GetAsync($"/character?{queryString}");
+                var response = await _httpClient.GetAsync($"character?{queryString}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -58,7 +58,7 @@ namespace RickAndMortyBackend.Services
         {
             try
             {
-                var response = await _httpClient.GetAsync($"/character/{id}");
+                var response = await _httpClient.GetAsync($"character/{id}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -89,7 +89,7 @@ namespace RickAndMortyBackend.Services
                     return new List<EpisodeApi>();
 
                 var ids = string.Join(",", episodeIds);
-                var response = await _httpClient.GetAsync($"/episode/{ids}");
+                var response = await _httpClient.GetAsync($"episode/{ids}");
 
                 if (!response.IsSuccessStatusCode)
                 {

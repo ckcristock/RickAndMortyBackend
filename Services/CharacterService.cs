@@ -61,19 +61,56 @@ namespace RickAndMortyBackend.Services
         {
             try
             {
-                var apiCharacter = await _apiService.GetCharacterByIdAsync(id);
+                // STRATEGY: Check database first (cache), if not found then fetch from API
+                var cachedCharacter = await _characterRepository.GetByIdAsync(id);
 
-                if (apiCharacter == null)
-                    return null;
+                CharacterApi? apiCharacter;
+                List<int> episodeIds;
 
-                // Save character to database
-                await SaveCharacterToDatabase(apiCharacter);
+                if (cachedCharacter != null)
+                {
+                    // Character found in database, use cached data
+                    _logger.LogInformation($"Character {id} found in database cache");
 
-                // Get episodes
-                var episodeIds = apiCharacter.Episode
-                    .Select(url => int.Parse(url.Split('/').Last()))
-                    .ToList();
+                    // Parse episodes from JSON
+                    episodeIds = JsonSerializer.Deserialize<List<string>>(cachedCharacter.EpisodesJson)?
+                        .Select(url => int.Parse(url.Split('/').Last()))
+                        .ToList() ?? new List<int>();
 
+                    // Create ApiCharacter object from cached data for consistency
+                    apiCharacter = new CharacterApi
+                    {
+                        Id = cachedCharacter.Id,
+                        Name = cachedCharacter.Name,
+                        Status = cachedCharacter.Status,
+                        Species = cachedCharacter.Species,
+                        Type = cachedCharacter.Type,
+                        Gender = cachedCharacter.Gender,
+                        Image = cachedCharacter.Image,
+                        Origin = new Origin { Name = cachedCharacter.OriginName, Url = cachedCharacter.OriginUrl },
+                        Location = new Location { Name = cachedCharacter.LocationName, Url = cachedCharacter.LocationUrl },
+                        Created = cachedCharacter.Created
+                    };
+                }
+                else
+                {
+                    // Character not in database, fetch from API
+                    _logger.LogInformation($"Character {id} not in database, fetching from API");
+
+                    apiCharacter = await _apiService.GetCharacterByIdAsync(id);
+
+                    if (apiCharacter == null)
+                        return null;
+
+                    // Save character to database for future requests
+                    await SaveCharacterToDatabase(apiCharacter);
+
+                    episodeIds = apiCharacter.Episode
+                        .Select(url => int.Parse(url.Split('/').Last()))
+                        .ToList();
+                }
+
+                // Fetch episode details from API
                 var episodes = await _apiService.GetEpisodesByIdsAsync(episodeIds);
 
                 var detailDto = new CharacterDetailDto
